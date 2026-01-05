@@ -1,65 +1,143 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { UploadZone } from '@/components/converter/upload-zone';
+import { FormatSelector } from '@/components/converter/format-selector';
+import { QualitySlider } from '@/components/converter/quality-slider';
+import { ConversionQueue } from '@/components/converter/conversion-queue';
+import { useConversionStore } from '@/lib/stores/conversion-store';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQueryState, parseAsInteger } from 'nuqs';
+import toast from 'react-hot-toast';
+import type { ImageFormat } from '@/types/conversion';
 
 export default function Home() {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isConverting, setIsConverting] = useState(false);
+  const { addJob, updateJob } = useConversionStore();
+
+  const [format] = useQueryState('format', { defaultValue: 'webp' });
+  const [quality] = useQueryState('quality', parseAsInteger.withDefault(85));
+
+  const handleFilesSelected = (files: File[]) => {
+    setSelectedFiles(files);
+    toast.success(`${files.length} file(s) selected`);
+  };
+
+  const handleConvert = async () => {
+    if (selectedFiles.length === 0) {
+      toast.error('Please select files to convert');
+      return;
+    }
+
+    setIsConverting(true);
+
+    try {
+      for (const file of selectedFiles) {
+        // Add job to store
+        const jobId = addJob(file, format as ImageFormat, quality);
+
+        // Update to uploading
+        updateJob(jobId, { status: 'uploading' });
+
+        // Create FormData
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', format);
+        formData.append('quality', quality.toString());
+
+        // Call API
+        const response = await fetch('/api/convert', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Conversion failed');
+        }
+
+        const data = await response.json();
+
+        // Update job with CloudConvert job ID
+        updateJob(jobId, {
+          id: data.jobId,
+          status: 'processing',
+        });
+      }
+
+      toast.success('Conversion started!');
+      setSelectedFiles([]);
+    } catch (error) {
+      console.error('Conversion error:', error);
+      toast.error(error instanceof Error ? error.message : 'Conversion failed');
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto py-12 px-4 max-w-6xl">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-3">Image Converter</h1>
+          <p className="text-muted-foreground text-lg">
+            Convert images to web-optimized formats instantly
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Images</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UploadZone onFilesSelected={handleFilesSelected} disabled={isConverting} />
+
+                {selectedFiles.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Selected files: {selectedFiles.length}
+                    </p>
+                    <ul className="text-sm space-y-1">
+                      {selectedFiles.map((file, i) => (
+                        <li key={i} className="text-muted-foreground">
+                          {file.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormatSelector />
+                <QualitySlider />
+
+                <Button
+                  onClick={handleConvert}
+                  disabled={selectedFiles.length === 0 || isConverting}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isConverting ? 'Converting...' : 'Convert Images'}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </main>
-    </div>
+
+        <ConversionQueue />
+      </div>
+    </main>
   );
 }

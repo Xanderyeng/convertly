@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: image-converter
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - CLOUDCONVERT_API_KEY=${CLOUDCONVERT_API_KEY}
+      - CLOUDCONVERT_WEBHOOK_SECRET=${CLOUDCONVERT_WEBHOOK_SECRET}
+      - NEXT_PUBLIC_MAX_FILE_SIZE=${NEXT_PUBLIC_MAX_FILE_SIZE:-104857600}
+      - NEXT_PUBLIC_MAX_BATCH_SIZE=${NEXT_PUBLIC_MAX_BATCH_SIZE:-5}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    env_file:
+      - .env.local
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:3000/api/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
