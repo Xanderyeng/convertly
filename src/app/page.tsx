@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { UploadZone } from '@/components/converter/upload-zone';
 import { FormatSelector } from '@/components/converter/format-selector';
 import { QualitySlider } from '@/components/converter/quality-slider';
@@ -12,7 +12,7 @@ import { useQueryState, parseAsInteger } from 'nuqs';
 import toast from 'react-hot-toast';
 import type { ImageFormat } from '@/types/conversion';
 
-export default function Home() {
+function ConverterContent() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isConverting, setIsConverting] = useState(false);
   const { addJob, updateJob } = useConversionStore();
@@ -78,7 +78,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <main className="min-h-screen bg-linear-to-b from-background to-muted/20">
       <div className="container mx-auto py-12 px-4 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-3">Image Converter</h1>
@@ -139,5 +139,22 @@ export default function Home() {
         <ConversionQueue />
       </div>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-linear-to-b from-background to-muted/20">
+        <div className="container mx-auto py-12 px-4 max-w-6xl">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold mb-3">Image Converter</h1>
+            <p className="text-muted-foreground text-lg">Loading...</p>
+          </div>
+        </div>
+      </main>
+    }>
+      <ConverterContent />
+    </Suspense>
   );
 }

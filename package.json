@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "check": "biome check --write .",
+    "check": "biome check .",
+    "fix": "biome check --write .",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "typescript": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-progress": "^1.1.8",
