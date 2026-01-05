@@ -1,9 +1,12 @@
-import { NextRequest } from 'next/server';
-import { getJobStatus, calculateProgress, getDownloadUrl } from '@/lib/cloudconvert/jobs';
+import {
+  calculateProgress,
+  getDownloadUrl,
+  getJobStatus,
+} from "@/lib/cloudconvert/jobs";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ jobId: string }> }
+  _request: Request,
+  { params }: { params: Promise<{ jobId: string }> },
 ) {
   const { jobId } = await params;
 
@@ -31,7 +34,7 @@ export async function GET(
             controller.enqueue(encoder.encode(sseData));
 
             // Check if job is complete
-            if (job.status === 'finished' || job.status === 'error') {
+            if (job.status === "finished" || job.status === "error") {
               controller.close();
               return;
             }
@@ -44,7 +47,7 @@ export async function GET(
             // Schedule next poll
             setTimeout(poll, pollInterval);
           } catch (error) {
-            console.error('Polling error:', error);
+            console.error("Polling error:", error);
             controller.error(error);
           }
         };
@@ -52,7 +55,7 @@ export async function GET(
         // Start polling
         poll();
       } catch (error) {
-        console.error('Stream start error:', error);
+        console.error("Stream start error:", error);
         controller.error(error);
       }
     },
@@ -60,9 +63,9 @@ export async function GET(
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
     },
   });
 }

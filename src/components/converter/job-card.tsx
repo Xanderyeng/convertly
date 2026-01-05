@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { Download, X, RotateCw, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { formatFileSize } from '@/lib/utils';
-import { useConversionStore } from '@/lib/stores/conversion-store';
-import type { ConversionJob } from '@/types/conversion';
-import toast from 'react-hot-toast';
+import { AlertCircle, CheckCircle2, Download, RotateCw, X } from "lucide-react";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useConversionStore } from "@/lib/stores/conversion-store";
+import { formatFileSize } from "@/lib/utils";
+import type { ConversionJob } from "@/types/conversion";
 
 interface JobCardProps {
   job: ConversionJob;
@@ -19,7 +19,7 @@ export function JobCard({ job }: JobCardProps) {
   const { updateJob, removeJob } = useConversionStore();
 
   useEffect(() => {
-    if (job.status !== 'processing') return;
+    if (job.status !== "processing") return;
 
     const eventSource = new EventSource(`/api/jobs/${job.id}/stream`);
 
@@ -29,19 +29,19 @@ export function JobCard({ job }: JobCardProps) {
         status: data.status,
         progress: data.progress,
         downloadUrl: data.downloadUrl,
-        ...(data.status === 'finished' && { completedAt: new Date() }),
+        ...(data.status === "finished" && { completedAt: new Date() }),
       });
 
-      if (data.status === 'finished') {
+      if (data.status === "finished") {
         toast.success(`${job.fileName} converted successfully!`);
-      } else if (data.status === 'error') {
+      } else if (data.status === "error") {
         toast.error(`Failed to convert ${job.fileName}`);
       }
     };
 
     eventSource.onerror = () => {
       eventSource.close();
-      toast.error('Lost connection. Refreshing status...');
+      toast.error("Lost connection. Refreshing status...");
     };
 
     return () => eventSource.close();
@@ -49,7 +49,7 @@ export function JobCard({ job }: JobCardProps) {
 
   const handleDownload = () => {
     if (job.downloadUrl) {
-      window.open(job.downloadUrl, '_blank');
+      window.open(job.downloadUrl, "_blank");
     }
   };
 
@@ -59,20 +59,20 @@ export function JobCard({ job }: JobCardProps) {
 
   const getStatusBadge = () => {
     switch (job.status) {
-      case 'queued':
+      case "queued":
         return <Badge variant="secondary">Queued</Badge>;
-      case 'uploading':
+      case "uploading":
         return <Badge variant="secondary">Uploading</Badge>;
-      case 'processing':
+      case "processing":
         return <Badge variant="default">Converting</Badge>;
-      case 'finished':
+      case "finished":
         return (
           <Badge variant="default" className="bg-green-500">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             Complete
           </Badge>
         );
-      case 'error':
+      case "error":
         return (
           <Badge variant="destructive">
             <AlertCircle className="w-3 h-3 mr-1" />
@@ -95,32 +95,35 @@ export function JobCard({ job }: JobCardProps) {
             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
               <span>{formatFileSize(job.fileSize)}</span>
               <span>
-                {job.inputFormat.toUpperCase()} → {job.outputFormat.toUpperCase()}
+                {job.inputFormat.toUpperCase()} →{" "}
+                {job.outputFormat.toUpperCase()}
               </span>
               <span>Quality: {job.quality}%</span>
             </div>
 
-            {(job.status === 'uploading' || job.status === 'processing') && (
+            {(job.status === "uploading" || job.status === "processing") && (
               <div className="space-y-1">
                 <Progress value={job.progress} />
-                <p className="text-xs text-muted-foreground">{job.progress}% complete</p>
+                <p className="text-xs text-muted-foreground">
+                  {job.progress}% complete
+                </p>
               </div>
             )}
 
-            {job.status === 'error' && job.error && (
+            {job.status === "error" && job.error && (
               <p className="text-sm text-destructive">{job.error}</p>
             )}
           </div>
 
           <div className="flex items-center gap-2">
-            {job.status === 'finished' && job.downloadUrl && (
+            {job.status === "finished" && job.downloadUrl && (
               <Button size="sm" onClick={handleDownload}>
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
             )}
 
-            {job.status === 'error' && (
+            {job.status === "error" && (
               <Button size="sm" variant="outline">
                 <RotateCw className="w-4 h-4 mr-2" />
                 Retry

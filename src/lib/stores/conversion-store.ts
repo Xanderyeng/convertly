@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import type { ConversionJob, ImageFormat } from '@/types/conversion';
 import { uuidv7 } from "uuidv7";
+import { create } from "zustand";
+import type { ConversionJob, ImageFormat } from "@/types/conversion";
 
 interface ConversionStore {
   jobs: ConversionJob[];
@@ -27,7 +27,7 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
     const jobId = uuidv7();
     const fileName = file.name;
     const fileSize = file.size;
-    const inputFormat = file.type.split('/')[1] as ImageFormat;
+    const inputFormat = file.type.split("/")[1] as ImageFormat;
 
     const newJob: ConversionJob = {
       id: jobId,
@@ -36,7 +36,7 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
       inputFormat,
       outputFormat,
       quality,
-      status: 'queued',
+      status: "queued",
       progress: 0,
       createdAt: new Date(),
     };
@@ -50,7 +50,9 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
 
   updateJob: (jobId: string, updates: Partial<ConversionJob>) => {
     set((state) => ({
-      jobs: state.jobs.map((job) => (job.id === jobId ? { ...job, ...updates } : job)),
+      jobs: state.jobs.map((job) =>
+        job.id === jobId ? { ...job, ...updates } : job,
+      ),
     }));
   },
 
@@ -62,7 +64,9 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
 
   clearCompleted: () => {
     set((state) => ({
-      jobs: state.jobs.filter((job) => job.status !== 'finished' && job.status !== 'error'),
+      jobs: state.jobs.filter(
+        (job) => job.status !== "finished" && job.status !== "error",
+      ),
     }));
   },
 
@@ -71,16 +75,18 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
   },
 
   getPendingJobs: () => {
-    return get().jobs.filter((job) => job.status === 'queued');
+    return get().jobs.filter((job) => job.status === "queued");
   },
 
   getActiveJobs: () => {
     return get().jobs.filter(
-      (job) => job.status === 'uploading' || job.status === 'processing'
+      (job) => job.status === "uploading" || job.status === "processing",
     );
   },
 
   getCompletedJobs: () => {
-    return get().jobs.filter((job) => job.status === 'finished' || job.status === 'error');
+    return get().jobs.filter(
+      (job) => job.status === "finished" || job.status === "error",
+    );
   },
 }));

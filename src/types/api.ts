@@ -1,4 +1,4 @@
-import type { ImageFormat, JobStatus } from './conversion';
+import type { ImageFormat, JobStatus } from "./conversion";
 
 export interface ConvertRequest {
   file: File;

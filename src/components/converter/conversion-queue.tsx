@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
-import { useConversionStore } from '@/lib/stores/conversion-store';
-import { JobCard } from './job-card';
-import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useConversionStore } from "@/lib/stores/conversion-store";
+import { JobCard } from "./job-card";
 
 export function ConversionQueue() {
   const { jobs, clearCompleted } = useConversionStore();
 
   const activeJobs = jobs.filter(
-    (j) => j.status === 'processing' || j.status === 'uploading'
+    (j) => j.status === "processing" || j.status === "uploading",
   );
-  const queuedJobs = jobs.filter((j) => j.status === 'queued');
-  const completedJobs = jobs.filter((j) => j.status === 'finished' || j.status === 'error');
+  const queuedJobs = jobs.filter((j) => j.status === "queued");
+  const completedJobs = jobs.filter(
+    (j) => j.status === "finished" || j.status === "error",
+  );
 
   if (jobs.length === 0) {
     return null;
@@ -24,7 +26,7 @@ export function ConversionQueue() {
         <div>
           <h2 className="text-2xl font-bold">Conversions</h2>
           <p className="text-sm text-muted-foreground">
-            {activeJobs.length} converting • {queuedJobs.length} queued •{' '}
+            {activeJobs.length} converting • {queuedJobs.length} queued •{" "}
             {completedJobs.length} completed
           </p>
         </div>

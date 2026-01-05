@@ -1,5 +1,5 @@
-import { MIME_TYPES, MAX_FILE_SIZE, SUPPORTED_FORMATS } from './constants';
-import type { ImageFormat, FileValidation } from '@/types/conversion';
+import type { FileValidation, ImageFormat } from "@/types/conversion";
+import { MAX_FILE_SIZE, MIME_TYPES, SUPPORTED_FORMATS } from "./constants";
 
 export function validateFileSize(file: File): FileValidation {
   if (file.size > MAX_FILE_SIZE) {
@@ -18,7 +18,7 @@ export function validateFileType(file: File): FileValidation {
   if (!format || !SUPPORTED_FORMATS.includes(format)) {
     return {
       isValid: false,
-      error: `Unsupported file format. Supported: ${SUPPORTED_FORMATS.join(', ')}`,
+      error: `Unsupported file format. Supported: ${SUPPORTED_FORMATS.join(", ")}`,
     };
   }
 

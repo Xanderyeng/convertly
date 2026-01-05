@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useCallback, useState } from 'react';
-import { Upload } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { validateFile } from '@/lib/file-validation';
-import toast from 'react-hot-toast';
+import { Upload } from "lucide-react";
+import { useCallback, useState } from "react";
+import toast from "react-hot-toast";
+import { validateFile } from "@/lib/file-validation";
+import { cn } from "@/lib/utils";
 
 interface UploadZoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -31,7 +31,7 @@ export function UploadZone({
         if (validation.isValid) {
           validFiles.push(file);
         } else {
-          toast.error(validation.error || 'Invalid file');
+          toast.error(validation.error || "Invalid file");
         }
       }
 
@@ -39,7 +39,7 @@ export function UploadZone({
         onFilesSelected(validFiles);
       }
     },
-    [onFilesSelected, maxFiles]
+    [onFilesSelected, maxFiles],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -58,26 +58,40 @@ export function UploadZone({
       setIsDragging(false);
       handleFiles(e.dataTransfer.files);
     },
-    [handleFiles]
+    [handleFiles],
   );
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFiles(e.target.files);
     },
-    [handleFiles]
+    [handleFiles],
   );
 
   return (
-    <div
+    <button
+      type="button"
+      aria-label="Upload images by dragging and dropping or clicking to browse"
       className={cn(
-        'relative border-2 border-dashed rounded-lg p-12 text-center transition-colors',
-        isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25',
-        disabled && 'opacity-50 cursor-not-allowed'
+        "relative border-2 border-dashed rounded-lg p-12 text-center transition-colors",
+        isDragging
+          ? "border-primary bg-primary/5"
+          : "border-muted-foreground/25",
+        disabled && "opacity-50 cursor-not-allowed",
       )}
+      disabled={disabled}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const input = e.currentTarget.querySelector('input[type="file"]');
+          if (input instanceof HTMLInputElement && !disabled) {
+            input.click();
+          }
+        }
+      }}
     >
       <input
         type="file"
@@ -104,6 +118,6 @@ export function UploadZone({
           Supports: PNG, JPG, WEBP, AVIF, SVG, GIF, TIFF, BMP, ICO, HEIC
         </div>
       </div>
-    </div>
+    </button>
   );
 }

@@ -1,17 +1,22 @@
 export type ImageFormat =
-  | 'png'
-  | 'jpg'
-  | 'jpeg'
-  | 'webp'
-  | 'avif'
-  | 'svg'
-  | 'gif'
-  | 'tiff'
-  | 'bmp'
-  | 'ico'
-  | 'heic';
+  | "png"
+  | "jpg"
+  | "jpeg"
+  | "webp"
+  | "avif"
+  | "svg"
+  | "gif"
+  | "tiff"
+  | "bmp"
+  | "ico"
+  | "heic";
 
-export type JobStatus = 'queued' | 'uploading' | 'processing' | 'finished' | 'error';
+export type JobStatus =
+  | "queued"
+  | "uploading"
+  | "processing"
+  | "finished"
+  | "error";
 
 export interface ConversionJob {
   id: string;
@@ -32,7 +37,7 @@ export interface ConversionOptions {
   quality: number;
   width?: number;
   height?: number;
-  fit?: 'max' | 'crop' | 'scale';
+  fit?: "max" | "crop" | "scale";
 }
 
 export interface FileValidation {

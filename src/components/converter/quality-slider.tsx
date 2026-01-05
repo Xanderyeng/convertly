@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useQueryState, parseAsInteger } from 'nuqs';
-import { Slider } from '@/components/ui/slider';
+import { parseAsInteger, useQueryState } from "nuqs";
+import { Slider } from "@/components/ui/slider";
 
 export function QualitySlider() {
   const [quality, setQuality] = useQueryState(
-    'quality',
-    parseAsInteger.withDefault(85)
+    "quality",
+    parseAsInteger.withDefault(85),
   );
 
   return (
